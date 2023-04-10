@@ -1,0 +1,424 @@
+:: StoryTitle
+Journey template
+
+
+:: StoryData
+{
+	"ifid": "C3A16691-C05E-47CA-B8E6-A1CC8300BED5",
+	"format": "SugarCube",
+	"format-version": "2.36.1",
+	"start": "landing",
+	"zoom": 0.6
+}
+
+
+:: Story Stylesheet [stylesheet]
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap");
+
+@import url("./styles/generics.css");
+@import url("./styles/styles.css");
+
+
+
+:: Story JavaScript [script]
+$('#ui-bar').remove();
+$(document.head).find('#style-ui-bar').remove();
+// TYPEWRITER FN
+!function() {
+    postrender.typewriter = function (b) {
+        if (this.tags) {
+            var r = new RegExp("t8n.typewriter.([0-9]+)(?:[^0-9]|$)","g");
+            var t = r.exec(this.tags.toString());
+            if (t) {
+                typeout(b, t[1]+0);
+            }
+        }
+        return b;
+    };
+    var typeout = function(c,t) {
+        var Furl = function(current) {
+            this.n = current;
+            this.out = false;
+            this.data = current.nodeValue;
+            current.nodeValue = "";
+            this.kids = [];
+            var cn = current.childNodes;
+            if (current.style && current.style.display=="none") {
+                return;
+            }
+            while (cn.length>0) {
+                var f = new Furl(cn[0]);
+                current.removeChild(cn[0]);
+                f.out = true;this.kids.push(f);
+            }
+        };
+        var nodes = new Furl(c);
+        var unfurl = function(furled,d) {
+            var n = furled.n;
+            if (furled.out) {
+                d.appendChild(n);
+                furled.out = false;
+            }
+            if (furled.data) {
+                n.nodeValue += furled.data[0];
+                furled.data = furled.data.slice(1);
+                return true;
+            }
+            for (var j=0; j<furled.kids.length; j++) {
+                var ret = unfurl(furled.kids[j],n);
+                if (ret) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        var title = passage();
+        var intr = setInterval (
+            function() {
+                if (passage() == title && unfurl(nodes,null)) {
+                    return;
+                }
+                clearInterval(intr);
+            }
+        ,t);
+    };
+}();
+
+// MAKE MAP FUNCTION
+
+setup.generateDirectionsMap = function (latorg, longorg, latdest, longdest){
+const iFrame = document.createElement("iframe")
+iFrame.classList.add("map")
+iFrame.setAttribute("loading", "lazy")
+iFrame.setAttribute("referrerpolicy", "no-referrer-when-downgrade")
+// iFrame.setAttribute("allowfullscreen")
+iFrame.setAttribute("src", `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBDRwRTMpSybNcmgkYVX1yZ0YmBbNhs9qU&center=${latorg},${longorg}&zoom=17&origin=${latorg},${longorg}&destination=${latdest},${longdest}&mode=walking`)
+const mount = document.getElementById("mapMount")
+return iFrame
+}
+
+//Get random 5 letter word
+
+setup.generate5LetterCode = () => {
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+let word = ""
+for (let i =0 ; i < 5 ; i++){
+word += alphabet[Math.round((alphabet.length-1)*Math.random())];
+}
+  return word;
+}
+
+//Check if an array contains multiple instances of an element
+
+setup.checkForRepeats = (array,element) => {
+ const arrayCopy = [...array];
+ const duplicates = arrayCopy.filter((item, index) => index !== arrayCopy.indexOf(item));
+ return duplicates.contains(element)
+}
+
+
+:: StoryInit {"position":"100,100","size":"100,100"}
+<<cacheaudio "badjoke" "https://youhavefoundconey.net/CG/what/assets/audio/badjoke.mp3">>
+<<waitforaudio>>
+
+
+:: header [nobr]{"position":"100,225","size":"100,100"}
+<header>
+<div class="header-item"></div>
+<div class="header-item">
+  <h1>$title</h1>
+  <h3 class="subtitle">With Fire & Rage</h3>
+</div >
+</header>
+
+
+:: footer [nobr]{"position":"100,375","size":"100,100"}
+<footer>
+<<if $showBackwards is true>>
+  <div class="nav-wrapper">
+    <div class="nav-item">
+        [img[Back|assets/img/backward.png][$prevpass]]
+    </div>
+  </div>
+  <</if>>
+  /* <<if $showRewind is true>>
+  <div class="nav-wrapper">
+    <div class="nav-item">
+   <<link [img[assets/img/backward.png]]>><<audio $audio time -5s>><</link>>
+    </div>
+  </div>
+  <</if>> */
+  <<if $showMap is true>>
+    <div class="nav-wrapper">
+      <div class="nav-item">
+    <<link [img[assets/img/map.png]]>><<toggleclass "#map" "hide">><</link>>
+    </div>
+  </div>
+  <</if>>
+  <<if $showAudio is true>>
+   <div class="nav-wrapper">
+    <div class="nav-item">
+ <<link [img[assets/img/play.png]]>><<replace "#audio">><p>[audio playing...]</p><</replace>><</link>>
+   </div>
+  </div>
+  <</if>>
+    <<if $showReplay is true>>
+     <div class="nav-wrapper">
+    <div class="nav-item">
+    [img[Replay|assets/img/replay.png][$passage]]
+    </div>
+    </div>
+    <</if>>
+    /* <<if $showCredits is true>>
+     <div class="nav-wrapper">
+    <div class="nav-item">
+    [[Credits|credits]]
+    </div>
+    </div>
+    <</if>> */
+     <<if $showCaptionsIcon is true>>
+     <div class="nav-wrapper">
+    <div class="nav-item">
+  <<link [img[assets/img/captions.png]]>><<set $captions to !$captions>><<goto $passage>><</link>>
+    </div>
+    </div>
+    <</if>>
+    /* <<if $showFF is true>>
+    <div class="nav-wrapper">
+    <div class="nav-item">
+        <<link [img[assets/img/forward.png]]>><<audio $audio time +10s>><</link>>
+    </div>
+  </div>
+     <</if>> */
+<<if $showForwards is true>>
+    <div class="nav-wrapper">
+    <div class="nav-item">
+         [img[Forward|assets/img/forward.png][$nextpass]]
+    </div>
+  </div>
+     <</if>>
+</footer>
+
+
+:: footerback [nobr]{"position":"100,375","size":"100,100"}
+<footer>
+  <div class="nav-wrapper">
+    <div class="nav-item">
+        [img[Back|assets/img/backward.png][$prevpass]]
+    </div>
+  </div>
+  <div class="nav-wrapper">
+ 
+  </div>
+  
+</footer>
+
+:: lost {"position":"700,50","size":"100,100"}
+<<set $passage to "lost">><<include "header">>
+<main>
+Sorry to hear that you're lost! 
+You have two options:
+
+<<button "Begin the adventure again">><<goto "landing">><</button>>
+
+<<button "Take me straight to the end location!">><<goto "end">><</button>>
+</main>
+<<include "footer">>
+
+
+:: landing [nobr] {"position":"700,175","size":"100,100"}
+<<set $passage to "landing">>
+<<set $showMap to false>>
+<<set $showAudio to false>>
+<<set $showReplay to false>>
+<<set $showForwards to false>>
+<<set $showBackwards to false>>
+<<set $showCaptionsIcon to false>>
+<<set $currentLocation to "Liverpool Central">>
+<main class="landing">
+
+<p>We start this journey at Liverpool Central. </p>
+<p>When you're ready, click the button to go to the next location.</p>
+
+<div class="nav-wrapper">
+<<button "I'm ready to start">><<goto "walk">><</button>>
+</div>
+
+</main>
+
+
+:: end {"position":"97,615","size":"100,100"}
+<main>
+
+End
+
+</main>
+
+
+
+:: walk [nobr]{"position":"700,300","size":"100,100"}
+<<set $passage to "walk">>
+<<set $myMap = setup.generateDirectionsMap(53.40475638418438, -2.980092838167595,53.4086936905494, -2.9798216352858717)>>
+<main>
+
+<p>Please make your way to St. George's Hall. Please be careful and pay full attention while crossing any roads.</p>
+
+$myMap
+<div class = "menu-wrapper">
+<<button "I'm at St. George's Hall">>
+	<<goto "360">>
+<</button>>
+<<button "Go back a step">>
+	<<goto "landing">>
+<</button>>
+</div>
+<main>
+</main>
+
+
+:: 360[nobr] {"position":"700,425","size":"100,100"}
+<<set $passage to "360">>
+<<set $currentLocation to "St George's Hall">>
+<main>
+
+<iframe width="90%" height="500px" allowFullScreen="true" allow="accelerometer; magnetometer; gyroscope" style="display:block; margin:20px auto; border:0 none; max-width:880px;border-radius:8px; box-shadow: 0 1px 1px rgba(0,0,0,0.11),0 2px 2px rgba(0,0,0,0.11),0 4px 4px rgba(0,0,0,0.11),0 6px 8px rgba(0,0,0,0.11),0 8px 16px rgba(0,0,0,0.11);" src="https://panoraven.com/en/embed/4xursceJIj"></iframe>
+
+<p>Please tap the arrow symbols (in the bottom right corner) to toggle fullscreen mode</p>
+
+<div class="menu-wrapper">
+<<button "I'm ready to move on">>
+	<<goto "walk2">>
+<</button>>
+<<button "Go back">>
+	<<goto "walk">>
+<</button>>
+</div>
+</main>
+
+
+:: walk2 [nobr] {"position":"700,550","size":"100,100"}
+<<set $passage to "walk">>
+<<set $myMap = setup.generateDirectionsMap(53.4086936905494, -2.9798216352858717,53.408968411859796, -2.978284601304633)>>
+<main>
+
+<p>Please make your way to The Empire Theatre. Please be careful and pay full attention while crossing any roads.</p>
+
+$myMap
+<div class = "menu-wrapper">
+<<button "I'm at The Empire Theatre">>
+	<<goto "empire360">>
+<</button>>
+<<button "Go back a step">>
+	<<goto "360">>
+<</button>>
+</div>
+<main>
+</main>
+
+
+:: last [br] {"position":"700,950","size":"100,100"}
+<<set $passage to "last">>
+<main>
+<div class = "nav-wrapper">
+
+<p>This link would take them to the twine app for this location</p>
+
+<<button "Start again">>
+	<<goto "landing">>
+<</button>>
+</div>
+</main>
+
+
+:: empire360 [nobr]{"position":"700,675","size":"100,100"}
+<<set $passage to "empre360">>
+<<set $currentLocation to "Liverpool Empire">>
+<main>
+
+<iframe width="90%" height="500px" allowFullScreen="true" allow="accelerometer; magnetometer; gyroscope" style="display:block; margin:20px auto; border:0 none; max-width:880px;border-radius:8px; box-shadow: 0 1px 1px rgba(0,0,0,0.11),0 2px 2px rgba(0,0,0,0.11),0 4px 4px rgba(0,0,0,0.11),0 6px 8px rgba(0,0,0,0.11),0 8px 16px rgba(0,0,0,0.11);" src="https://panoraven.com/en/embed/r5YUZfcXEy"></iframe>
+
+<p>Please tap the arrow symbols (in the bottom right corner) to toggle fullscreen mode</p>
+
+<div class="menu-wrapper">
+<<button "I'm ready to move on">>
+	<<goto "nextjourney">>
+<</button>>
+<<button "Go back">>
+	<<goto "walk2">>
+<</button>>
+</div>
+</main>
+
+
+:: nextjourney [nobr] {"position":"700,825","size":"100,100"}
+<<set $passage to "nextjourney">>
+<main>
+<p>
+  That's the end of this journey, thank you for joining us.</p>
+<p>  You are currently at $currentLocation.  There are other journeys nearby - which would you like to go to?
+</p>
+  
+  <div class="menu-wrapper">
+  <<button "SPIRITS OF CONCRETE AND IRON">>
+    <<set $destination to "St. George's Hall">>
+    <<goto "maptolocation">>
+  <</button>>
+   <p> This starts at St. George's Hall</p>
+    
+  <<button "OUR BIGGEST PREMIERE YET">>
+     <<set $destination to "Liverpool Empire">>
+    <<goto "maptolocation">>
+  <</button>>
+<p>  This starts at Liverpool Empire</p>
+  </div>
+  
+</main>
+
+
+:: maptolocation {"position":"825,825","size":"100,100"}
+<<set $passage to "maptolocation">>
+<<nobr>>
+<<set $locations to [["St. George's Hall",53.40811025940036, -2.980446286501197],
+["Liverpool Empire",53.40900038910033, -2.978338245481878], ["Liverpool Central Station",53.40473612530249, -2.979955657127461]]>>
+
+<<for _i to 0; _i lt $locations.length; _i++>>
+<<script>>console.log("here")<</script>>
+	<<if $locations[_i][0] is $currentLocation>>
+    	<<set $currentlat to $locations[_i][1]>>
+        <<set $currentlong to $locations[_i][2]>>
+    <</if>>
+    <<if $locations[_i][0] is $destination>>
+    	<<set $destinationlat to $locations[_i][1]>>
+        <<set $destinationlong to $locations[_i][2]>>
+    <</if>>
+<</for>>
+
+<<set $myMap = setup.generateDirectionsMap($currentlat, $currentlong, $destinationlat, $destinationlong)>>
+<</nobr>>
+<main>
+
+<<if $currentLocation is $destination>>
+<p>You are already at $destination, so we can start your journey now</p>
+
+<<button "Let's get started">>
+	<<goto "last">>
+<</button>>
+<<else>>
+
+<p>This journey starts at $destination, please make your way there.</p>
+<p>Please be careful and pay full attention while crossing any roads.</p>
+$myMap
+<p>Are you at $destination?</p>
+<<button "Yes">>
+	<<goto "last">>
+    <<set $currentLocation to $destination>>
+<</button>>
+<</if>>
+
+<<button "Go back a step">>
+	<<goto "nextjourney">>
+<</button>>
+
+</main>
+
+
